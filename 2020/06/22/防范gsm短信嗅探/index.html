@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="「防不了」的新型盗刷方式：GSM 短信嗅探详解 - 少数派FromJune 22, 2020 关于信息安全，我们似乎觉得，只要自己不「作」，就不会「翻车」：平时不无脑点击各种来路不明的链接、不随便将验证码告知他人，不法分子便对我们无可奈何。 然而，最近一种新的盗刷方式却刷新了我们的理解——不用用户点击任何链接，甚至在用户没有察觉的情况下，就能轻松获得手机上的验证码，盗取用户支付宝，微信，网银中的资">
+<meta property="og:type" content="article">
+<meta property="og:title" content="防范gsm短信嗅探">
+<meta property="og:url" content="http://yoursite.com/2020/06/22/%E9%98%B2%E8%8C%83gsm%E7%9F%AD%E4%BF%A1%E5%97%85%E6%8E%A2/index.html">
+<meta property="og:site_name" content="PETER TANG">
+<meta property="og:description" content="「防不了」的新型盗刷方式：GSM 短信嗅探详解 - 少数派FromJune 22, 2020 关于信息安全，我们似乎觉得，只要自己不「作」，就不会「翻车」：平时不无脑点击各种来路不明的链接、不随便将验证码告知他人，不法分子便对我们无可奈何。 然而，最近一种新的盗刷方式却刷新了我们的理解——不用用户点击任何链接，甚至在用户没有察觉的情况下，就能轻松获得手机上的验证码，盗取用户支付宝，微信，网银中的资">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://cdn.sspai.com/minja/2018-08-06-1.png">
+<meta property="og:image" content="https://cdn.sspai.com/2018/08/06/5d2df36035db36efa53b0d4b8a4ffbe3.jpg">
+<meta property="og:image" content="https://cdn.sspai.com/minja/2018-08-06-3.png">
+<meta property="og:image" content="https://cdn.sspai.com/2018/08/06/9bcbfac47d18b53e1064bc0e53e4bca5.jpeg">
+<meta property="og:image" content="https://cdn.sspai.com/2018/08/06/cb28deb10db6d0da663b5023854542a0.jpg">
+<meta property="article:published_time" content="2020-06-22T06:41:18.600Z">
+<meta property="article:modified_time" content="2020-06-22T14:52:38.558Z">
+<meta property="article:author" content="PETER TANG">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.sspai.com/minja/2018-08-06-1.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/06/22/%E9%98%B2%E8%8C%83gsm%E7%9F%AD%E4%BF%A1%E5%97%85%E6%8E%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>防范gsm短信嗅探 | PETER TANG</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="PETER TANG" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">PETER TANG</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/22/%E9%98%B2%E8%8C%83gsm%E7%9F%AD%E4%BF%A1%E5%97%85%E6%8E%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="PETER TANG">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="PETER TANG">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          防范gsm短信嗅探
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-06-22 14:41:18 / Modified: 22:52:38" itemprop="dateCreated datePublished" datetime="2020-06-22T14:41:18+08:00">2020-06-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="「防不了」的新型盗刷方式：GSM-短信嗅探详解-少数派"><a href="#「防不了」的新型盗刷方式：GSM-短信嗅探详解-少数派" class="headerlink" title="「防不了」的新型盗刷方式：GSM 短信嗅探详解 - 少数派"></a>「防不了」的新型盗刷方式：GSM 短信嗅探详解 - 少数派</h1><p><a href="https://sspai.com/post/46020" target="_blank" rel="noopener">From</a>June 22, 2020</p>
+<p>关于信息安全，我们似乎觉得，只要自己不「作」，就不会「翻车」：平时不无脑点击各种来路不明的链接、不随便将验证码告知他人，不法分子便对我们无可奈何。</p>
+<p>然而，最近一种新的盗刷方式却刷新了我们的理解——<strong>不用用户点击任何链接，甚至在用户没有察觉的情况下，就能轻松获得手机上的验证码，盗取用户支付宝，微信，网银中的资产。</strong></p>
+<p><img src="https://cdn.sspai.com/minja/2018-08-06-1.png" alt="img"></p>
+<p>事件介绍 事件介绍目前为止几个受害人经历都非常相似：从凌晨的某个时间开始手机就不断收到各种验证码短信，一般从支付宝的登录验证码开始，接着是修改支付宝支付密码，再然后就是银行卡各种转出，消费和贷款。</p>
+<p>这里是部分受害人相关的微博文章和动态：</p>
+<p>最重要的是，与普通的盗刷方式不同，<strong>所有受害人都没有点击未知链接，也没有主动将验证码之类的敏感信息转发给任何人，甚至大部分受害人都是在早上起床才发现被人在凌晨盗刷。</strong></p>
+<p>这实在是刷新了我们的理解，难道不法分子的技术已经能够直接远程操控手机了吗？答案并不完全对，其实这个技术还不是那么新，这几个受害人碰到的不法分子，使用的都是一种可以远程获取手机信息的方式：<strong>GSM 短信嗅探（GSM Sniffing）</strong>。</p>
+<p>这是一种什么方式？为啥最近突然出现？危害性如何？我们自身如何才能防范这种类型的攻击？接下来我就给大家一一分析。</p>
+<p>GSM 短信嗅探原理拦截手机信号，分析其中的短信和通话内容。这听起来像是电影之中的剧情，但是其实做到这一点没有想象中那么难。</p>
+<p>我们都知道，手机作为一种无线设备，必须通用基站进行数据交换。无论是 2G，3G 还是 4G 网络，手机和基站之间本质都是通过无线电波进行通讯，而无线电波是向四周扩散的，理论上只要在手机功率发射电波的范围内的任何设备都可以接收到这些无线电波。</p>
+<p><img src="https://cdn.sspai.com/2018/08/06/5d2df36035db36efa53b0d4b8a4ffbe3.jpg" alt="img"></p>
+<p>而基站和手机之间约定的无线电波接收方法和格式就是通信协议。在国内：</p>
+<ul>
+<li><strong>4G</strong> 协议就是我们经常在状态栏上看到的 LTE（OFDM，UWB），它的好处除了我们能够感受到的网速快和延时低外，还有一个特别重要的优点：支持 VoIP 方式通话，也就是我们打电话时语音数据不仅可以走 4G 通道，也可以借助有线和无线网络传输，摆脱对移动信号的依赖。</li>
+<li><strong>3G</strong> 用的是 UMTS/WCDMA/TD-SCDMA，这个时期各家运营商的制式都不大相同，缺乏一个统一的标准，而且相比 2G 来讲 3G 创新的点并不多，速度也不能满足当时的需求。</li>
+<li><strong>2G</strong> 网络使用的，就是今天的罪魁祸首 —— GSM 协议。<strong>2G 网络架构是开源的，它本身传输数据时也没有加密，这就导致短信内容是明文传输的</strong>1 ，这就给不法分子提供了可乘之机。</li>
+<li></li>
+</ul>
+<p>因为现在 2G 网络并没有完全被淘汰，所以干坏事儿的门槛就断崖式降低了。</p>
+<p>在硬件上，不法分子们经常改装的手机摩托罗拉 C118 在网上便宜到只要十几块钱就能买到一台，加上数据线等材料和工具，犯罪成本总共算下来也不过几十块钱。</p>
+<p>而软件上，他们也不再需要专业人士的帮助。只要借助  即可，它的全称为 Open Source Mobile Communications Baseband，是从硬件层到应用层彻彻底底开源的 GSM 协议实现项目，<strong>它的出现让人无需学习复杂的网络通讯和通讯设备的硬件知识，就能在 GSM 协议里面按照自己的需求随意更改，添加功能。</strong>GSM 嗅探就是添加的功能之一。</p>
+<p>实践上，不法分子只需要将修改过后的 OSMOCOMBB 编译进随便一台手机里面，软硬件结合，<strong>手机就可以变成一台反向获取附近基站发出的无线电波的设备</strong>，再加上一台电脑就可以轻松获取到周围空气中飞奔的短信内容。</p>
+<p>关于这方面的相关教程甚至被定义为「新手难度」，还很容易就能搜索到（数量可以说达到泛滥的地步了……）。</p>
+<p>提示：为了避免模仿犯罪，本文提到的原理和科普均隐去技术细节与详细内容。</p>
+<p><img src="https://cdn.sspai.com/minja/2018-08-06-3.png" alt="img"></p>
+<p>有了这套设备后，不法分子的犯罪流程就容易理解了：</p>
+<ol>
+<li><strong>地点随机，时间深夜</strong>：随机挑选一个地点作为目标，带着伪基站和修改好的 OSMOCOMBB 手机半夜过去。之所以大部分类型盗刷都发生在半夜，是因为这个时候大部分人都在睡觉，给不法分子操作时间最长，而且用户不能即使发现止损。</li>
+<li><strong>获取号码，登录网站</strong>：使用伪基站获取附近手机的手机号码，然后拿着号码请求登录普通网站。</li>
+<li><strong>过滤数据，验证号码</strong>：过滤 OSMOCOMBB 手机获取到的数据，如果拿到了网站发出的验证码即表明号码有效。</li>
+<li><strong>号码有效，开始盗刷</strong>：接下来就是消费支付宝银行卡里面的钱，如果用户在一些网站上做过手持身份证验证，不法分子还可以登陆这些网站拿到手机主人的名字，身份证号和手持身份证照片。有了这些，大额贷款也可以申请了。</li>
+<li></li>
+</ol>
+<p><strong>这个过程，从头到尾都不需要受害人参与。</strong></p>
+<p>为什么最近才开始出现众多受害者既然 GSM 嗅探利用的是 2G 协议的漏洞，不是什么新的东西，那为什么直到最近几天才「搞了个大新闻」呢？</p>
+<p>其实，这项攻击技术在很多年前就已经开始有人尝试。但是由于以下 2 个原因并没有成为一种流行的攻击方式：</p>
+<ol>
+<li><strong>以前技术门槛更高</strong>：当时硬件成本和编译方法还没有像如今一样简单，这提高了准入门槛。直到 Github 上开源的嗅探项目越来越多也越来越 「小白」，才有更多的不法分子采用这种方法（千万别高看他们的文化水平，有能力自己修改 GSM 项目的人不会用它来犯罪）。</li>
+<li><strong>以前实名制范围不够广</strong>：那时候还没有实名制，所以大部分服务都没有强制绑定手机号码，大多数用户依旧采用邮箱登录。</li>
+<li><strong>以前在线支付尚未普及</strong>：加之网络支付和网银等在那时普及度不高，所以获得短信内容的意义不是很大。<strong>这种方法主要还是私家侦探等用于窃听私人信息。</strong></li>
+</ol>
+<p>最近正值运营商废除 2G 之时，众多 GSM 嗅探的受害人想必也会加快运营商废除 2G 网络的速度。虽然 3G，4G 也有类似的攻击方法，不过其难度将大大提升。</p>
+<p><img src="https://cdn.sspai.com/2018/08/06/9bcbfac47d18b53e1064bc0e53e4bca5.jpeg" alt="img"></p>
+<p> 谁该背锅与局限性至于这个锅就要扔到 GSM 不加密和手机验证码登录身上，手机验证码登录本身就是一个很不安全的验证方式，现在<strong>短信验证码能够做到的东西（转账，实名等）已经远远超出了它本身安全性的范围</strong>。</p>
+<p>另外，虽然 GSM 嗅探听起来很吓人，但是这也不代表不法分子可以为所欲为，它也是有自己的缺点的。</p>
+<ul>
+<li><strong>距离限制</strong>：不法分子只有在受害者手机在其基站附近才能实现嗅探，距离被严重限制。不过，如果不法分子提高成本，购买高性能天线的话则可以延长嗅探距离。</li>
+<li><strong>形式限制</strong>：这种方法只能获取短信验证码，所以只能做和短信验证码有关的事。如果用户的个人信息保护地非常好那么不法分子能做的事情就少了很多（U 盾等实体二步认证硬件就是为了防范这种攻击）。</li>
+<li></li>
+</ul>
+<p>当然这些缺点也不妨碍 GSM 嗅探成为最近危害性最大的攻击手段之一。</p>
+<p>应对方法说实话，面对这种绕过用户的攻击手段普通用户还真的没有太有效的防范方法。这里我只能总结几条除了保护好个人信息、报警之类车轱辘话以外比较有效的方法。</p>
+<ul>
+<li><strong>手机定时开关机/飞行模式：</strong>晚上睡觉前关机或者打开飞行模式，这样手机不会连到伪基站，基站获取不到手机的状态信息就不会将验证码短信发送给手机，不法分子获取不到手机号码和验证码短信。</li>
+<li><strong>警惕信号好的地方掉 2G 网络：</strong>这种攻击需要借助 2G 网络，有时候不法分子会用伪基站让手机掉到 2G 来拦截语音短信和联网数据。当你的手机在平时信号很好的地方突然掉到 2G 就要小心附近是不是有伪基站和 GSM 嗅探了。</li>
+<li><strong>设置手机不会掉到 2G 网络：</strong>用户可以在网络设置里面设置为只使用 3G，4G 网络。这样子的缺点是不支持 4G VoLTE 的手机会打不了也接不了电话，相当于自爆。当然如果手机还不支持 4G 或是 VoLTE 功能也该换了，否则别说 GSM 嗅探了，连伪基站攻击都防不了。</li>
+<li><strong>开通 VoLTE</strong>：开通之后加上手机支持，电话和短信都是走 4G 通道，不会使用 2G 网络。例如移动用户就可以发送 <code>KTVOLTE</code> 到 10086 开通 VoLTE；联通用户可以发送 <code>VBNCDGFBDE</code> 到 10010 开通。不过即使这样也防不了不法分子会用伪基站让手机掉到 2G，<strong>需结合前面两点使用</strong>。</li>
+<li><strong>专门使用一个手机号接收验证码</strong>：可以先准备一台手机，双卡手机的话可以准备一张手机卡，专门用于接收验证码短信。这个手机或这张卡平时可以不开机或者禁用。这种方法虽麻烦但也许是目前最有效的。</li>
+<li><strong>使用二步验证</strong>：支持二步验证的网站，也可以打开网站应用的两步验证。让对方仅凭手机号也验证码没办法进入你的账户。</li>
+<li><strong>受到损失后及时报警查看附近监控</strong>：如果是看教程自己改手机那种小毛贼的话，也许能通过附近监控找到，但是如果是惯犯或者对于拿着巨型天线扫描的专业组织就没办法了。</li>
+<li></li>
+</ul>
+<p>最后想补一句，因为电信在 2G 使用的协议是 CDMA，所以可以天然免疫 GSM 嗅探这种攻击方式。</p>
+<p>结语随着运营商退 2G 行动的完成，这种攻击方法也会渐渐成为历史，以后一定会有新的攻击方法代替它，到时候我依然会第一时间给大家出谋划策。喜欢这篇文章可以在少数派关注我（fairyex），我们下次再见。</p>
+<p><img src="https://cdn.sspai.com/2018/08/06/cb28deb10db6d0da663b5023854542a0.jpg" alt="img"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/21/ubuntu/" rel="prev" title="ubuntu">
+      <i class="fa fa-chevron-left"></i> ubuntu
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/11/git%E5%91%BD%E4%BB%A4%E5%A4%A7%E5%85%A8/" rel="next" title="git命令大全">
+      git命令大全 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#「防不了」的新型盗刷方式：GSM-短信嗅探详解-少数派"><span class="nav-number">1.</span> <span class="nav-text">「防不了」的新型盗刷方式：GSM 短信嗅探详解 - 少数派</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="PETER TANG"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">PETER TANG</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">PETER TANG</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
