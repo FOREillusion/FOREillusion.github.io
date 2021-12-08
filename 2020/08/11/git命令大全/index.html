@@ -549,10 +549,10 @@ echo 'Viper';
 <li>Git 查看提交历史<br>在使用 Git 提交了若干更新之后，又或者克隆了某个项目，想回顾下提交历史，我们可以使用 git log 命令查看。</li>
 </ol>
 <p>针对我们前一章节的操作，使用 git log 命令列出历史提交记录如下：</p>
-<p>$ git log<br>commit d5e9fc2c811e0ca2b2d28506ef7dc14171a207d9 (HEAD -&gt; master)<br>Merge: c68142b 7774248<br>Author: Viper <a href="mailto:&#x74;&#101;&#115;&#116;&#x40;&#86;&#x69;&#112;&#101;&#114;&#x2e;&#x63;&#x6f;&#x6d;">&#x74;&#101;&#115;&#116;&#x40;&#86;&#x69;&#112;&#101;&#114;&#x2e;&#x63;&#x6f;&#x6d;</a><br>Date:   Fri May 3 15:55:58 2019 +0800</p>
-<pre><code>Merge branch &apos;change_site&apos;</code></pre><p>commit c68142b562c260c3071754623b08e2657b4c6d5b<br>Author: Viper <a href="mailto:&#x74;&#x65;&#115;&#x74;&#x40;&#x56;&#105;&#112;&#101;&#x72;&#x2e;&#x63;&#x6f;&#x6d;">&#x74;&#x65;&#115;&#x74;&#x40;&#x56;&#105;&#112;&#101;&#x72;&#x2e;&#x63;&#x6f;&#x6d;</a><br>Date:   Fri May 3 15:52:12 2019 +0800</p>
-<pre><code>修改代码</code></pre><p>commit 777424832e714cf65d3be79b50a4717aea51ab69 (change_site)<br>Author: Viper <a href="mailto:&#x74;&#x65;&#115;&#x74;&#x40;&#x56;&#105;&#x70;&#101;&#114;&#x2e;&#99;&#x6f;&#109;">&#x74;&#x65;&#115;&#x74;&#x40;&#x56;&#105;&#x70;&#101;&#114;&#x2e;&#99;&#x6f;&#109;</a><br>Date:   Fri May 3 15:49:26 2019 +0800</p>
-<pre><code>changed the Viper.php</code></pre><p>commit c1501a244676ff55e7cccac1ecac0e18cbf6cb00<br>Author: Viper <a href="mailto:&#116;&#101;&#x73;&#116;&#x40;&#86;&#x69;&#112;&#x65;&#x72;&#46;&#x63;&#111;&#x6d;">&#116;&#101;&#x73;&#116;&#x40;&#86;&#x69;&#112;&#x65;&#x72;&#46;&#x63;&#111;&#x6d;</a><br>Date:   Fri May 3 15:35:32 2019 +0800<br>我们可以用 –oneline 选项来查看历史记录的简洁的版本。</p>
+<p>$ git log<br>commit d5e9fc2c811e0ca2b2d28506ef7dc14171a207d9 (HEAD -&gt; master)<br>Merge: c68142b 7774248<br>Author: Viper <a href="mailto:&#116;&#x65;&#x73;&#x74;&#x40;&#86;&#x69;&#x70;&#101;&#114;&#x2e;&#99;&#x6f;&#x6d;">&#116;&#x65;&#x73;&#x74;&#x40;&#86;&#x69;&#x70;&#101;&#114;&#x2e;&#99;&#x6f;&#x6d;</a><br>Date:   Fri May 3 15:55:58 2019 +0800</p>
+<pre><code>Merge branch &apos;change_site&apos;</code></pre><p>commit c68142b562c260c3071754623b08e2657b4c6d5b<br>Author: Viper <a href="mailto:&#116;&#x65;&#115;&#x74;&#x40;&#x56;&#105;&#x70;&#101;&#114;&#46;&#99;&#x6f;&#109;">&#116;&#x65;&#115;&#x74;&#x40;&#x56;&#105;&#x70;&#101;&#114;&#46;&#99;&#x6f;&#109;</a><br>Date:   Fri May 3 15:52:12 2019 +0800</p>
+<pre><code>修改代码</code></pre><p>commit 777424832e714cf65d3be79b50a4717aea51ab69 (change_site)<br>Author: Viper <a href="mailto:&#116;&#101;&#115;&#116;&#x40;&#x56;&#105;&#112;&#x65;&#114;&#46;&#x63;&#111;&#109;">&#116;&#101;&#115;&#116;&#x40;&#x56;&#105;&#112;&#x65;&#114;&#46;&#x63;&#111;&#109;</a><br>Date:   Fri May 3 15:49:26 2019 +0800</p>
+<pre><code>changed the Viper.php</code></pre><p>commit c1501a244676ff55e7cccac1ecac0e18cbf6cb00<br>Author: Viper <a href="mailto:&#116;&#x65;&#x73;&#116;&#x40;&#86;&#105;&#112;&#101;&#x72;&#x2e;&#x63;&#111;&#109;">&#116;&#x65;&#x73;&#116;&#x40;&#86;&#105;&#112;&#101;&#x72;&#x2e;&#x63;&#111;&#109;</a><br>Date:   Fri May 3 15:35:32 2019 +0800<br>我们可以用 –oneline 选项来查看历史记录的简洁的版本。</p>
 <p>$ git log –oneline<br>$ git log –oneline<br>d5e9fc2 (HEAD -&gt; master) Merge branch ‘change_site’<br>c68142b 修改代码<br>7774248 (change_site) changed the Viper.php<br>c1501a2 removed test.txt、add Viper.php<br>3e92c19 add test.txt<br>3b58100 第一次版本提交<br>这告诉我们的是，此项目的开发历史。</p>
 <p>我们还可以用 –graph 选项，查看历史中什么时候出现了分支、合并。以下为相同的命令，开启了拓扑图选项：</p>
 <ul>
@@ -904,20 +904,5 @@ echo 'Viper';
   }
 </script>
 
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ["$","$"], ["\\(","\\)"] ],
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-            processEscapes: true
-        }
-    });
-    MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax();
-        for (var i = 0; i < all.length; ++i)
-            all[i].SourceElement().parentNode.className += ' has-jax';
-    });
-</script>
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 </body>
 </html>
